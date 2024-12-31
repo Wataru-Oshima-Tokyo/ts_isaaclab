@@ -1,0 +1,3 @@
+[submodule "ts_robot_usd"]
+	path = ts_robot_usd
+	url = https://github.com/TechShare-inc/ts_robot_usd.git
