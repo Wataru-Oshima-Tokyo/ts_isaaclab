@@ -106,3 +106,10 @@ def track_ang_vel_z_world_exp(
         env.command_manager.get_command(command_name)[:, 2] - asset.data.root_com_ang_vel_w[:, 2]
     )
     return torch.exp(-ang_vel_error / std**2)
+
+def feet_swing_height(
+    env: ManagerBasedRLEnv, command_name: str, sensor_cfg: SceneEntityCfg, threshold: float
+) -> torch.Tensor:
+    contact = torch.norm(self.contact_forces[:, self.feet_indices, :3], dim=2) > 1.
+    pos_error = torch.square(self.feet_pos[:, :, 2] - self.step_height) * ~contact
+    return torch.sum(pos_error, dim=(1))

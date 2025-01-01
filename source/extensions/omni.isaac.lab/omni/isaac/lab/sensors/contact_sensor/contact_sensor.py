@@ -295,6 +295,7 @@ class ContactSensor(SensorBase):
         else:
             self._data.net_forces_w_history = self._data.net_forces_w.unsqueeze(1)
         # -- pose of sensor origins
+        print(f"track pose is {self.cfg.track_pose:}")
         if self.cfg.track_pose:
             self._data.pos_w = torch.zeros(self._num_envs, self._num_bodies, 3, device=self._device)
             self._data.quat_w = torch.zeros(self._num_envs, self._num_bodies, 4, device=self._device)

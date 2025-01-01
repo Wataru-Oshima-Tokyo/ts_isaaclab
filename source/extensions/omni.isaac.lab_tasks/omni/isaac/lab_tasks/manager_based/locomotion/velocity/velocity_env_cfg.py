@@ -23,8 +23,10 @@ from omni.isaac.lab.utils import configclass
 from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR, ISAACLAB_NUCLEUS_DIR
 from omni.isaac.lab.utils.noise import AdditiveUniformNoiseCfg as Unoise
 
-import omni.isaac.lab_tasks.manager_based.locomotion.velocity.mdp as mdp
+from collections.abc import Sequence
 
+import omni.isaac.lab_tasks.manager_based.locomotion.velocity.mdp as mdp
+import torch
 ##
 # Pre-defined configs
 ##
@@ -318,3 +320,12 @@ class LocomotionVelocityRoughEnvCfg(ManagerBasedRLEnvCfg):
         else:
             if self.scene.terrain.terrain_generator is not None:
                 self.scene.terrain.terrain_generator.curriculum = False
+
+    def _reset_idx(self, env_ids: Sequence[int]):
+        # Add your custom comment or minimal action
+        print("experiment if it works")
+        
+        # Call the original implementation
+        return super()._reset_idx(env_ids)
+
+

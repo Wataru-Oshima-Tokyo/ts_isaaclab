@@ -17,7 +17,7 @@ tabs 4
 
 # get source directory
 export ISAACLAB_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-
+echo "export ISAACLAB_PATH:=$ISAACLAB_PATH" >> ~/.bashrc
 #==
 # Helper functions
 #==

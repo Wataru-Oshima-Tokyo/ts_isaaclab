@@ -5,7 +5,7 @@
 
 from omni.isaac.lab.utils import configclass
 
-from omni.isaac.lab_tasks.manager_based.locomotion.velocity.velocity_env_cfg import *
+from omni.isaac.lab_tasks.manager_based.locomotion.velocity.velocity_env_cfg import LocomotionVelocityRoughEnvCfg, ObservationsCfg
 from omni.isaac.lab.managers import CurriculumTermCfg as CurrTerm
 from omni.isaac.lab.managers import EventTermCfg as EventTerm
 from omni.isaac.lab.managers import ObservationGroupCfg as ObsGroup
@@ -21,14 +21,15 @@ from omni.isaac.lab.utils.assets import ISAAC_NUCLEUS_DIR, ISAACLAB_NUCLEUS_DIR
 from omni.isaac.lab.utils.noise import AdditiveUniformNoiseCfg as Unoise
 
 import omni.isaac.lab_tasks.manager_based.locomotion.velocity.mdp as mdp
+
 ##
 # Pre-defined configs
 ##
-from omni.isaac.lab_assets.unitree import UNITREE_GO1_CFG  # isort: skip
+from omni.isaac.lab_assets.unitree import UNITREE_ALIENGO_CFG  # isort: skip
 
 
 @configclass
-class UnitreeGo1RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
+class UnitreeAliengoRoughEnvCfg(LocomotionVelocityRoughEnvCfg):
     @configclass
     class ModifiedPolicyCfg(ObservationsCfg.PolicyCfg):
         """Modified observations for policy group."""
@@ -50,52 +51,15 @@ class UnitreeGo1RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
         )
         def __post_init__(self):
             super().__post_init__()
-            self.enable_corruption = True  # Disable corruption
-            self.concatenate_terms = True  # Disable concatenation of terms
-
-    @configclass
-    class ModifiedRewardsCfg(RewardsCfg):
-        """Reward terms for the MDP."""
-
-        # -- task
-        track_lin_vel_xy_exp = RewTerm(
-            func=mdp.track_lin_vel_xy_exp, weight=1.0, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
-        )
-        track_ang_vel_z_exp = RewTerm(
-            func=mdp.track_ang_vel_z_exp, weight=0.5, params={"command_name": "base_velocity", "std": math.sqrt(0.25)}
-        )
-        # -- penalties
-        lin_vel_z_l2 = RewTerm(func=mdp.lin_vel_z_l2, weight=-2.0)
-        ang_vel_xy_l2 = RewTerm(func=mdp.ang_vel_xy_l2, weight=-0.05)
-        dof_torques_l2 = RewTerm(func=mdp.joint_torques_l2, weight=-1.0e-5)
-        dof_acc_l2 = RewTerm(func=mdp.joint_acc_l2, weight=-2.5e-7)
-        action_rate_l2 = RewTerm(func=mdp.action_rate_l2, weight=-0.01)
-        feet_air_time = RewTerm(
-            func=mdp.feet_air_time,
-            weight=0.125,
-            params={
-                "sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*foot"),
-                "command_name": "base_velocity",
-                "threshold": 0.5,
-            },
-        )
-        undesired_contacts = RewTerm(
-            func=mdp.undesired_contacts,
-            weight=-1.0,
-            params={"sensor_cfg": SceneEntityCfg("contact_forces", body_names=".*thigh"), "threshold": 1.0},
-        )
-        # -- optional penalties
-        flat_orientation_l2 = RewTerm(func=mdp.flat_orientation_l2, weight=0.0)
-        dof_pos_limits = RewTerm(func=mdp.joint_pos_limits, weight=0.0)
-
-
+            self.enable_corruption = False  # Disable corruption
+            self.concatenate_terms = False  # Disable concatenation of terms
 
 
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
-        self.observations.policy = self.ModifiedPolicyCfg()
-        self.scene.robot = UNITREE_GO1_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
+        # self.observations.policy = self.ModifiedPolicyCfg()
+        self.scene.robot = UNITREE_ALIENGO_CFG.replace(prim_path="{ENV_REGEX_NS}/Robot")
         self.scene.height_scanner.prim_path = "{ENV_REGEX_NS}/Robot/trunk"
         # scale down the terrains because the robot is small
         self.scene.terrain.terrain_generator.sub_terrains["boxes"].grid_height_range = (0.025, 0.1)
@@ -123,23 +87,21 @@ class UnitreeGo1RoughEnvCfg(LocomotionVelocityRoughEnvCfg):
             },
         }
 
-
-        self.rewards = self.ModifiedRewardsCfg()
-        # # rewards
-        # self.rewards.feet_air_time.params["sensor_cfg"].body_names = ".*_foot"
-        # self.rewards.feet_air_time.weight = 0.01
-        # self.rewards.undesired_contacts = None
-        # self.rewards.dof_torques_l2.weight = -0.0002
-        # self.rewards.track_lin_vel_xy_exp.weight = 1.5
-        # self.rewards.track_ang_vel_z_exp.weight = 0.75
-        # self.rewards.dof_acc_l2.weight = -2.5e-7
+        # rewards
+        self.rewards.feet_air_time.params["sensor_cfg"].body_names = ".*_foot"
+        self.rewards.feet_air_time.weight = 0.01
+        self.rewards.undesired_contacts = None
+        self.rewards.dof_torques_l2.weight = -0.0002
+        self.rewards.track_lin_vel_xy_exp.weight = 1.5
+        self.rewards.track_ang_vel_z_exp.weight = 0.75
+        self.rewards.dof_acc_l2.weight = -2.5e-7
 
         # terminations
         self.terminations.base_contact.params["sensor_cfg"].body_names = "trunk"
 
 
 @configclass
-class UnitreeGo1RoughEnvCfg_PLAY(UnitreeGo1RoughEnvCfg):
+class UnitreeAliengoRoughEnvCfg_PLAY(UnitreeAliengoRoughEnvCfg):
     def __post_init__(self):
         # post init of parent
         super().__post_init__()
